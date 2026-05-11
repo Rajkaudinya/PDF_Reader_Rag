@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuMind AI | PDF RAG Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="bg-decoration">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-brain-circuit"></i>
+                <h1>DocuMind <span>AI</span></h1>
+            </div>
+            <div class="status-badge" id="backend-status">
+                <span class="dot"></span> Backend Connected
+            </div>
+        </header>
+
+        <main>
+            <section class="sidebar">
+                <div class="card upload-card">
+                    <h3><i class="fas fa-cloud-upload-alt"></i> Upload PDF</h3>
+                    <p>Add your documents to the knowledge base</p>
+                    
+                    <div class="upload-zone" id="drop-zone">
+                        <input type="file" id="file-input" accept=".pdf" hidden>
+                        <i class="fas fa-file-pdf"></i>
+                        <p>Drag & drop or <span>browse</span></p>
+                        <small>PDF files up to 20MB</small>
+                    </div>
+                    
+                    <div id="upload-progress-container" class="hidden">
+                        <div class="progress-bar">
+                            <div id="upload-progress-fill"></div>
+                        </div>
+                        <p id="upload-status-text">Uploading...</p>
+                    </div>
+                </div>
+
+                <div class="card documents-card">
+                    <h3><i class="fas fa-folder-open"></i> Knowledge Base</h3>
+                    <div class="document-list" id="document-list">
+                        <div class="empty-state">
+                            <i class="fas fa-ghost"></i>
+                            <p>No documents yet</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="chat-area">
+                <div class="card chat-card">
+                    <div class="chat-header">
+                        <div class="chat-info">
+                            <i class="fas fa-comments"></i>
+                            <div>
+                                <h4>AI Assistant</h4>
+                                <p>Answers based on your PDFs</p>
+                            </div>
+                        </div>
+                        <button id="clear-chat" title="Clear Chat">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+
+                    <div class="messages" id="chat-messages">
+                        <div class="message bot">
+                            <div class="avatar"><i class="fas fa-robot"></i></div>
+                            <div class="content">
+                                <p>Hello! I'm your DocuMind AI. Upload your PDF documents on the left, and I'll help you extract insights, summarize content, or answer specific questions about them. What can I help you with today?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-container">
+                        <div id="typing-indicator" class="hidden">
+                            <span></span><span></span><span></span> AI is thinking...
+                        </div>
+                        <form id="chat-form">
+                            <input type="text" id="user-input" placeholder="Ask a question about your documents..." autocomplete="off">
+                            <button type="submit" id="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
