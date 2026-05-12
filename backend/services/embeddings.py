@@ -23,9 +23,8 @@ def get_embeddings():
         _embeddings = GoogleGenerativeAIEmbeddings(
             model=EMBEDDING_MODEL,
             google_api_key=GOOGLE_API_KEY,
-            # Force the stable v1 API endpoint (text-embedding-004 is not on v1beta)
-            client_options={"api_endpoint": "generativelanguage.googleapis.com"},
-            transport="rest",
+            task_type="retrieval_document",
+            version="v1beta",
         )
     return _embeddings
 

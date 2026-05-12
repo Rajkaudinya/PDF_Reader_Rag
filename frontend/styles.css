@@ -164,6 +164,7 @@ main {
     gap: 24px;
     overflow-y: auto;
     padding-right: 4px;
+    min-height: 0; /* Prevents sidebar from expanding beyond parent */
 }
 
 .card {
@@ -297,6 +298,8 @@ main {
 .chat-area {
     display: flex;
     flex-direction: column;
+    min-height: 0; /* Prevents chat area from expanding beyond parent */
+    overflow: hidden;
 }
 
 .chat-card {
@@ -354,12 +357,19 @@ main {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    scroll-behavior: smooth;
 }
 
 .message {
     display: flex;
     gap: 16px;
     max-width: 85%;
+    animation: messageSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes messageSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .message.bot {
@@ -400,13 +410,16 @@ main {
 
 .bot .content {
     background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-top-left-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .user .content {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
     border-top-right-radius: 4px;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 /* Chat Input */
@@ -566,7 +579,12 @@ main {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+::-webkit-scrollbar-thumb { 
+    background: rgba(255, 255, 255, 0.15); 
+    border-radius: 10px; 
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }

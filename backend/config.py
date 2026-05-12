@@ -26,8 +26,8 @@ CHUNK_OVERLAP = 200
 RETRIEVAL_K = 4
 
 # LLM settings
-LLM_MODEL = "gemini-2.0-flash"
+LLM_MODEL = "gemini-3.1-flash-lite"
 LLM_TEMPERATURE = 0.3
 
 # Embedding model
-EMBEDDING_MODEL = "models/text-embedding-004"
+EMBEDDING_MODEL = "models/gemini-embedding-2"

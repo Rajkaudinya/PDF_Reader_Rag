@@ -23,7 +23,17 @@ const backendStatus = document.getElementById('backend-status');
 document.addEventListener('DOMContentLoaded', () => {
     checkBackendHealth();
     fetchDocuments();
+    scrollToBottom(); // Scroll to welcome message
 });
+
+function scrollToBottom() {
+    setTimeout(() => {
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+    }, 100);
+}
 
 // --- Backend Utilities ---
 
@@ -137,7 +147,7 @@ chatForm.addEventListener('submit', async (e) => {
     
     // Show typing
     typingIndicator.classList.remove('hidden');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollToBottom();
 
     try {
         const response = await fetch(`${API_BASE}/api/ask`, {
@@ -183,7 +193,7 @@ function addMessage(role, text, sources = []) {
     `;
 
     chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollToBottom();
 }
 
 // Basic markdown formatting
