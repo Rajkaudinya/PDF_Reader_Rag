@@ -1,1 +1,1 @@
-# Backend package init
+# Backend package initialization
