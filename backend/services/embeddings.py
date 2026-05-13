@@ -24,7 +24,6 @@ def get_embeddings():
             model=EMBEDDING_MODEL,
             google_api_key=GOOGLE_API_KEY,
             task_type="retrieval_document",
-            version="v1beta",
         )
     return _embeddings
 
@@ -118,3 +117,31 @@ def clear_vector_store():
     if os.path.exists(pkl_file):
         os.remove(pkl_file)
     logger.info("Vector store cleared")
+    
+
+def reindex_all_files():
+    """
+    Clear the vector store and re-index all files in the upload directory.
+    """
+    from backend.config import UPLOAD_DIR
+    from backend.services.pdf_processor import process_pdf
+    import os
+    
+    logger.info("Starting re-indexing of all files...")
+    clear_vector_store()
+    
+    files = [f for f in os.listdir(UPLOAD_DIR) if f.endswith(".pdf")]
+    if not files:
+        logger.info("No files found to re-index")
+        return
+        
+    for filename in files:
+        file_path = os.path.join(UPLOAD_DIR, filename)
+        try:
+            chunks = process_pdf(file_path)
+            add_to_vector_store(chunks)
+            logger.info(f"Re-indexed {filename}")
+        except Exception as e:
+            logger.error(f"Failed to re-index {filename}: {e}")
+            
+    logger.info("Re-indexing complete")

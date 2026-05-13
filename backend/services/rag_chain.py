@@ -10,6 +10,7 @@ from langchain_core.runnables import RunnablePassthrough
 from backend.config import GOOGLE_API_KEY, LLM_MODEL, LLM_TEMPERATURE
 from backend.services.embeddings import get_retriever
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +18,16 @@ logger = logging.getLogger(__name__)
 SYSTEM_PROMPT = """
 You are a helpful and accurate assistant for a PDF Question Answering System.
 Use the following pieces of retrieved context to answer the user's question. 
-If you don't know the answer based on the context, say that you don't know. 
-Do not try to make up an answer. Use three sentences maximum and keep the answer concise.
 
 Context: {context}
 
 Question: {question}
+
+Instructions:
+1. Use three sentences maximum and keep the answer concise.
+2. If you don't know the answer based on the context, say that you don't know. 
+3. Do NOT include source filenames or page numbers in your text response (they will be shown in a separate metadata section).
+4. Do not try to make up an answer.
 
 Helpful Answer:
 """
@@ -32,8 +37,9 @@ def format_docs(docs):
     formatted = []
     for doc in docs:
         source = doc.metadata.get("source", "Unknown")
+        filename = os.path.basename(source)
         page = doc.metadata.get("page", "?")
-        formatted.append(f"[Source: {source}, Page: {page}]\n{doc.page_content}")
+        formatted.append(f"[Source: {filename}, Page: {page}]\n{doc.page_content}")
     return "\n\n".join(formatted)
 
 async def generate_answer(question: str):
@@ -80,7 +86,7 @@ async def generate_answer(question: str):
         seen_sources = set()
         for doc in retrieved_docs:
             source_info = {
-                "filename": doc.metadata.get("source", "Unknown"),
+                "filename": os.path.basename(doc.metadata.get("source", "Unknown")),
                 "page": doc.metadata.get("page", "?")
             }
             source_key = f"{source_info['filename']}-{source_info['page']}"

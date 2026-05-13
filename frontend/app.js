@@ -5,34 +5,99 @@
 
 const API_BASE = ''; // Same origin
 
-// DOM Elements
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-const chatForm = document.getElementById('chat-form');
-const userInput = document.getElementById('user-input');
-const chatMessages = document.getElementById('chat-messages');
-const documentList = document.getElementById('document-list');
-const typingIndicator = document.getElementById('typing-indicator');
-const uploadProgressContainer = document.getElementById('upload-progress-container');
-const uploadProgressFill = document.getElementById('upload-progress-fill');
-const uploadStatusText = document.getElementById('upload-status-text');
-const clearChatBtn = document.getElementById('clear-chat');
-const backendStatus = document.getElementById('backend-status');
+// DOM Elements (will be initialized in DOMContentLoaded)
+let dropZone, fileInput, chatForm, userInput, clearChatBtn, getStartedBtn, landingPage, appPage, chatMessages, documentList, typingIndicator, uploadProgressContainer, uploadProgressFill, uploadStatusText;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize elements
+    dropZone = document.getElementById('drop-zone');
+    fileInput = document.getElementById('file-input');
+    chatForm = document.getElementById('chat-form');
+    userInput = document.getElementById('user-input');
+    clearChatBtn = document.getElementById('clear-chat');
+    getStartedBtn = document.getElementById('get-started-btn');
+    landingPage = document.getElementById('landing-page');
+    appPage = document.getElementById('app-page');
+    chatMessages = document.getElementById('chat-messages');
+    documentList = document.getElementById('document-list');
+    typingIndicator = document.getElementById('typing-indicator');
+    uploadProgressContainer = document.getElementById('upload-progress-container');
+    uploadProgressFill = document.getElementById('upload-progress-fill');
+    uploadStatusText = document.getElementById('upload-status-text');
+
+    // Attach Event Listeners
+    if (getStartedBtn) {
+        getStartedBtn.addEventListener('click', () => {
+            sessionStorage.setItem('appStarted', 'true');
+            showApp();
+        });
+    }
+
+    if (chatForm) {
+        chatForm.addEventListener('submit', handleChatSubmit);
+    }
+
+    if (dropZone) {
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleUpload(file);
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleUpload(file);
+        });
+    }
+
+    if (clearChatBtn) {
+        clearChatBtn.addEventListener('click', () => {
+            chatMessages.innerHTML = '';
+            addMessage('bot', "Chat cleared. How else can I help you?");
+        });
+    }
+
+    // Initial load
     checkBackendHealth();
     fetchDocuments();
-    scrollToBottom(); // Scroll to welcome message
+    scrollToBottom();
+    
+    // Check session persistence
+    if (sessionStorage.getItem('appStarted') === 'true') {
+        showApp();
+    }
 });
 
+function showApp() {
+    if (landingPage && appPage) {
+        landingPage.style.display = 'none';
+        appPage.classList.remove('hidden');
+        appPage.style.display = 'grid';
+        scrollToBottom();
+    }
+}
+
 function scrollToBottom() {
-    setTimeout(() => {
-        chatMessages.scrollTo({
-            top: chatMessages.scrollHeight,
-            behavior: 'smooth'
-        });
-    }, 100);
+    if (chatMessages) {
+        setTimeout(() => {
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }, 100);
+    }
 }
 
 // --- Backend Utilities ---
@@ -40,56 +105,23 @@ function scrollToBottom() {
 async function checkBackendHealth() {
     try {
         const response = await fetch(`${API_BASE}/api/health`);
-        if (response.ok) {
-            backendStatus.classList.remove('offline');
-            backendStatus.innerHTML = '<span class="dot"></span> Backend Connected';
-        } else {
-            setBackendOffline();
-        }
+        // Silently handle health check for the new UI
     } catch (error) {
-        setBackendOffline();
+        console.warn('Backend is offline');
     }
-}
-
-function setBackendOffline() {
-    backendStatus.classList.add('offline');
-    backendStatus.innerHTML = '<span class="dot"></span> Backend Offline';
 }
 
 async function fetchDocuments() {
     try {
-        const response = await fetch(`${API_BASE}/api/documents`);
+        const response = await fetch(`${API_BASE}/api/upload`);
         const data = await response.json();
-        renderDocumentList(data.documents);
+        renderDocumentList(data.files);
     } catch (error) {
         console.error('Error fetching documents:', error);
     }
 }
 
 // --- Upload Logic ---
-
-dropZone.addEventListener('click', () => fileInput.click());
-
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-});
-
-dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('dragover');
-});
-
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) handleUpload(file);
-});
-
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) handleUpload(file);
-});
 
 async function handleUpload(file) {
     if (!file.name.endsWith('.pdf')) {
@@ -136,8 +168,10 @@ async function handleUpload(file) {
 
 // --- Chat Logic ---
 
-chatForm.addEventListener('submit', async (e) => {
+async function handleChatSubmit(e) {
     e.preventDefault();
+    e.stopPropagation();
+    
     const question = userInput.value.trim();
     if (!question) return;
 
@@ -169,7 +203,7 @@ chatForm.addEventListener('submit', async (e) => {
     } finally {
         typingIndicator.classList.add('hidden');
     }
-});
+}
 
 function addMessage(role, text, sources = []) {
     const msgDiv = document.createElement('div');
@@ -196,18 +230,13 @@ function addMessage(role, text, sources = []) {
     scrollToBottom();
 }
 
-// Basic markdown formatting
 function formatText(text) {
+    if (!text) return '';
     return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br>');
 }
-
-clearChatBtn.addEventListener('click', () => {
-    chatMessages.innerHTML = '';
-    addMessage('bot', "Chat cleared. How else can I help you?");
-});
 
 // --- UI Rendering ---
 
@@ -226,11 +255,38 @@ function renderDocumentList(docs) {
         <div class="doc-item">
             <div class="doc-icon"><i class="fas fa-file-pdf"></i></div>
             <div class="doc-info">
-                <div class="doc-name">${doc}</div>
-                <div class="doc-meta">Indexed & Ready</div>
+                <div class="doc-name" title="${doc.filename}">${doc.filename}</div>
+                <div class="doc-meta">${(doc.size / 1024).toFixed(1)} KB</div>
             </div>
+            <button class="delete-btn" onclick="deleteDocument('${doc.filename}')" title="Delete Document">
+                <i class="fas fa-trash-alt"></i>
+            </button>
         </div>
     `).join('');
+}
+
+async function deleteDocument(filename) {
+    if (!confirm(`Are you sure you want to delete ${filename}? This will remove it from the knowledge base.`)) {
+        return;
+    }
+
+    try {
+        showToast(`Deleting ${filename}...`, 'info');
+        const response = await fetch(`${API_BASE}/api/upload/${filename}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showToast(`Deleted ${filename}`, 'success');
+            fetchDocuments();
+            addMessage('bot', `I've removed **${filename}** from my knowledge base and updated my index.`);
+        } else {
+            const error = await response.json();
+            showToast(`Failed to delete: ${error.detail}`, 'error');
+        }
+    } catch (error) {
+        showToast('Delete failed. Connection error.', 'error');
+    }
 }
 
 function showToast(message, type = 'info') {
@@ -244,6 +300,7 @@ function showToast(message, type = 'info') {
     `;
     
     const container = document.getElementById('toast-container');
+    if (!container) return;
     container.appendChild(toast);
     
     setTimeout(() => {

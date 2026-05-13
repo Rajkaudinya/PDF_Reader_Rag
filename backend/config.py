@@ -23,10 +23,10 @@ CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 
 # Retrieval settings
-RETRIEVAL_K = 4
+RETRIEVAL_K = 6
 
 # LLM settings
-LLM_MODEL = "gemini-3.1-flash-lite"
+LLM_MODEL = "models/gemini-3.1-flash-lite"
 LLM_TEMPERATURE = 0.3
 
 # Embedding model
