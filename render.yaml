@@ -9,12 +9,3 @@ services:
         sync: false
       - key: PYTHON_VERSION
         value: 3.10.0
-    disk:
-      name: pdf-storage
-      mountPath: /opt/render/project/src/backend/uploads
-      sizeGB: 1
-    # We also need a disk for the vector store to persist between restarts
-    disk:
-      name: vector-storage
-      mountPath: /opt/render/project/src/backend/vector_store
-      sizeGB: 1
