@@ -4,7 +4,7 @@ Handles text extraction from PDFs and document chunking.
 """
 
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from backend.config import CHUNK_SIZE, CHUNK_OVERLAP
 import logging
 
